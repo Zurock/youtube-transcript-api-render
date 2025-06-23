@@ -5,8 +5,16 @@ import re
 app = Flask(__name__)
 
 def extract_video_id(url):
-    match = re.search(r"(?:v=|youtu.be/)([a-zA-Z0-9_-]{11})", url)
-    return match.group(1) if match else None
+    patterns = [
+        r"v=([a-zA-Z0-9_-]{11})",               # standard watch URL
+        r"youtu\.be/([a-zA-Z0-9_-]{11})",       # shortened URL
+        r"youtube\.com/shorts/([a-zA-Z0-9_-]{11})"  # shorts
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
 
 @app.route('/transcript', methods=['GET'])
 def get_transcript():
