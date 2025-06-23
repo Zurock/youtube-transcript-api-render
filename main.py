@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
+import os
+import traceback
 
 app = Flask(__name__)
 
@@ -27,23 +29,8 @@ def get_transcript():
         full_text = ' '.join([item['text'] for item in transcript])
         return jsonify({'transcript': full_text})
     except Exception as e:
-        import traceback
-
-        @app.route('/transcript', methods=['GET'])
-        def get_transcript():
-            video_url = request.args.get('url')
-            video_id = extract_video_id(video_url)
-            if not video_id:
-                return jsonify({'error': 'Invalid YouTube URL'}), 400
-            try:
-                transcript = YouTubeTranscriptApi.get_transcript(video_id)
-                full_text = ' '.join([item['text'] for item in transcript])
-                return jsonify({'transcript': full_text})
-            except Exception as e:
-                traceback.print_exc()  # Logs full stack trace to Render console
-                return jsonify({'error': f'Transcript fetch failed: {str(e)}'}), 500
-
-import os
+        traceback.print_exc()  # Logs full error to Render logs
+        return jsonify({'error': f'Transcript fetch failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
